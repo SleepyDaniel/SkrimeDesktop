@@ -18,7 +18,7 @@
 
 ## What is Skrime Desktop?
 
-Skrime Desktop is a native desktop app that lets you manage all your skrime.eu hosting services in one place. Log in once with your API token and get a full overview of everything - servers, domains, TeamSpeak instances, SSL certificates, backups, and more - without touching a browser.
+Skrime Desktop is a native desktop app that puts all your skrime.eu hosting in one spot. Just log in with your API token once, and you can easily manage servers, domains, TeamSpeak instances, SSL certificates, backups, and more without using a browser.
 
 <p align="center">
     <img src="https://i.postimg.cc/yNSSTqKR/image-(32)-1.png" alt="Showcase">
