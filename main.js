@@ -23,7 +23,8 @@ function mkWin() {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      spellcheck: false
+      spellcheck: false,
+      webviewTag: true
     },
     backgroundColor: '#F9F7F2',
     show: false
@@ -91,6 +92,7 @@ ipcMain.handle('api', (_, { method, endpoint, body, token }) => {
 })
 
 ipcMain.handle('open-url', (_, url) => shell.openExternal(url))
+
 
 ipcMain.handle('open-console', (_, url) => {
   const vncWin = new BrowserWindow({

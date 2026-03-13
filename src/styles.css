@@ -291,6 +291,36 @@ select { appearance: none; cursor: pointer; }
 .balance-label { font-size: 12.5px; font-weight: 600; opacity: .65; text-transform: uppercase; letter-spacing: .06em; }
 .balance-amount { font-size: 38px; font-weight: 700; letter-spacing: -.04em; margin: 6px 0; }
 .balance-currency { font-size: 14px; opacity: .7; }
+.balance-topup { margin-top: 16px; display: inline-flex; align-items: center; gap: 7px; padding: 8px 18px; background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.25); border-radius: 99px; font-family: inherit; font-size: 13px; font-weight: 600; color: #fff; cursor: pointer; transition: background .15s; }
+.balance-topup:hover { background: rgba(255,255,255,.25); }
+.balance-topup .ic { opacity: .9; }
+
+.charge-tabs { display: flex; gap: 4px; background: var(--surface2); border-radius: var(--r-sm); padding: 4px; margin-bottom: 18px; }
+.charge-tab { flex: 1; padding: 7px 12px; border: none; background: transparent; border-radius: 6px; font-family: inherit; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text-muted); transition: background .15s, color .15s; }
+.charge-tab.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow-sm); }
+
+.payment-methods { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+.payment-method { border: 1.5px solid var(--border); border-radius: var(--r-sm); padding: 10px; background: var(--surface); cursor: pointer; transition: border-color .15s, box-shadow .15s; display: flex; align-items: center; justify-content: center; min-height: 56px; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--text); }
+.payment-method img { max-width: 80px; max-height: 34px; object-fit: contain; }
+.payment-method:hover { border-color: var(--blue); }
+.payment-method.selected { border-color: var(--blue-d); box-shadow: 0 0 0 3px rgba(123,175,194,.2); background: var(--blue-l); }
+
+.bank-transfer-info { background: var(--surface2); border-radius: var(--r-sm); padding: 14px 16px; margin-bottom: 14px; }
+.bank-transfer-info .info-grid { gap: 8px; }
+
+.bonus-banner { display: flex; align-items: center; gap: 8px; background: var(--green-l); color: var(--green-d); border-radius: var(--r-sm); padding: 10px 14px; font-size: 13px; font-weight: 500; margin-bottom: 14px; }
+
+.payment-view-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 500px; height: 700px; max-width: 94vw; max-height: 90vh; background: var(--surface); border-radius: var(--r-lg); border: 1.5px solid var(--border); box-shadow: var(--shadow-lg); z-index: 910; display: flex; flex-direction: column; overflow: hidden; animation: slideUp .2s ease; }
+.payment-view-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 1.5px solid var(--border); background: var(--surface); flex-shrink: 0; }
+.payment-view-close { background: none; border: none; cursor: pointer; color: var(--text-muted); width: 30px; height: 30px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; transition: background .12s, color .12s; }
+.payment-view-close:hover { background: var(--surface2); color: var(--text); }
+.payment-view-loading { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--text-muted); font-size: 13px; }
+.spinner { width: 28px; height: 28px; border: 2.5px solid var(--border); border-top-color: var(--text-mid); border-radius: 50%; animation: spin .7s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.checkbox-row { display: flex; align-items: flex-start; gap: 9px; cursor: pointer; margin-top: 10px; }
+.checkbox-row input[type="checkbox"] { width: auto; min-width: 15px; margin-top: 2px; flex-shrink: 0; cursor: pointer; }
+.checkbox-row span { font-size: 13px; color: var(--text-mid); line-height: 1.4; }
 
 .transactions-list .tx-row { display: flex; align-items: center; gap: 12px; padding: 13px 18px; border-bottom: 1px solid var(--border); }
 .transactions-list .tx-row:last-child { border-bottom: none; }
@@ -302,6 +332,9 @@ select { appearance: none; cursor: pointer; }
 .tx-amount { font-weight: 600; font-size: 14px; flex-shrink: 0; }
 .tx-amount.pos { color: var(--green-d); }
 .tx-amount.neg { color: var(--terra-d); }
+.tx-amount.muted { color: var(--text-muted); }
+.tx-pending { opacity: .6; }
+.tx-state-badge { display: inline-block; margin-left: 7px; padding: 1px 7px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: capitalize; background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); vertical-align: middle; }
 
 .back-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--text-mid); cursor: pointer; padding: 6px 10px; border-radius: var(--r-sm); transition: background .12s, color .12s; margin-bottom: 16px; border: none; background: transparent; font-family: inherit; }
 .back-btn:hover { background: var(--surface2); color: var(--text); }
