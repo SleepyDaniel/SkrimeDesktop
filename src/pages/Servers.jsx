@@ -10,6 +10,7 @@ function ServerDetail({ server, onBack }) {
   const [net, setNet] = useState({})
   const [stats, setStats] = useState({})
   const [loading, setLoading] = useState(true)
+  const [showPassword, setShowPassword] = useState(false)
 
   const load = async () => {
     setLoading(true)
@@ -215,7 +216,11 @@ function ServerDetail({ server, onBack }) {
                     <span className="mono">{srvUsername} <button className="copy-btn" onClick={() => copy(srvUsername)}><Ic ic={icons.copy} sz={13}/></button></span>
                   </div>}
                   {srvPassword && <div className="info-item"><label>Password</label>
-                    <span className="mono">{srvPassword} <button className="copy-btn" onClick={() => copy(srvPassword)}><Ic ic={icons.copy} sz={13}/></button></span>
+                    <span className="mono" style={{display:'flex',alignItems:'center',gap:6}}>
+                      {showPassword ? srvPassword : '••••••••'}
+                      <button className="copy-btn" onClick={() => setShowPassword(v => !v)}><Ic ic={showPassword ? icons.eyeoff : icons.eye} sz={13}/></button>
+                      <button className="copy-btn" onClick={() => copy(srvPassword)}><Ic ic={icons.copy} sz={13}/></button>
+                    </span>
                   </div>}
                   <div className="info-item"><label>{t('created')}</label><span>{fmtDate(srvCreated)}</span></div>
                   <div className="info-item"><label>{t('expires')}</label><span>{fmtDate(srvExpire)}</span></div>
