@@ -1,7 +1,9 @@
-import { useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useApp } from '../ctx'
 import { icons, Ic } from '../utils/icons'
+import { parseProducts, prodNav, prodIcon, prodColor } from '../utils/fmt'
 import logo from '../assets/logo.png'
+import logoWhite from '../assets/logoWhite.png'
 
 const navItems = t => [
   { id: 'dashboard', icon: 'home', label: t('dashboard') },
@@ -15,10 +17,154 @@ const navItems = t => [
   { id: 'backup', icon: 'database', label: t('backup') },
 ]
 
+function GlobalSearch() {
+  const { api, cached, nav, t } = useApp()
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState([])
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const search = async q => {
+    if (!q.trim()) { setResults([]); setOpen(false); return }
+    const r = await cached('products', () => api('GET', 'product/all'))
+    const all = parseProducts(r)
+    const lower = q.toLowerCase()
+    const filtered = all.filter(p => {
+      const name = (p.customName || p.name || p.productInfo?.domain || p.domain || String(p.id)).toLowerCase()
+      return name.includes(lower) || (p.type || '').toLowerCase().includes(lower)
+    }).slice(0, 6)
+    setResults(filtered)
+    setOpen(true)
+  }
+
+  const handleChange = e => {
+    const q = e.target.value
+    setQuery(q)
+    search(q)
+  }
+
+  const go = p => {
+    nav(prodNav(p))
+    setQuery('')
+    setResults([])
+    setOpen(false)
+  }
+
+  return (
+    <div className="global-search" ref={ref}>
+      <div className="global-search-input-wrap">
+        <Ic ic={icons.search} sz={14} />
+        <input
+          type="text"
+          className="global-search-input"
+          placeholder={t('search_placeholder')}
+          value={query}
+          onChange={handleChange}
+          onFocus={() => results.length && setOpen(true)}
+        />
+      </div>
+      {open && (
+        <div className="global-search-dropdown">
+          {results.length ? results.map(p => (
+            <div key={p.id} className="search-result-item" onClick={() => go(p)}>
+              <div className="search-result-icon" style={{ background: prodColor(p.type) }}>
+                <Ic ic={icons[prodIcon(p.type)]} sz={14} />
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div className="search-result-name">{p.customName || p.name || p.productInfo?.domain || p.domain || p.id}</div>
+                <div className="search-result-type">{p.type}</div>
+              </div>
+            </div>
+          )) : (
+            <div className="search-no-results">{t('no_servers')}</div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function NotifBell() {
+  const { api, cached, t } = useApp()
+  const [open, setOpen] = useState(false)
+  const [notifs, setNotifs] = useState([])
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const handler = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  useEffect(() => {
+    const compute = async () => {
+      const [prods, user] = await Promise.all([
+        cached('products', () => api('GET', 'product/all')),
+        cached('user', () => api('GET', 'account/user')),
+      ])
+      const all = parseProducts(prods)
+      const now = Date.now()
+      const soon = 30 * 24 * 60 * 60 * 1000
+      const ns = []
+
+      all.forEach(p => {
+        const exp = p.expireAt || p.expire
+        if (exp) {
+          const diff = new Date(exp).getTime() - now
+          if (diff > 0 && diff < soon) {
+            const days = Math.ceil(diff / (24 * 60 * 60 * 1000))
+            ns.push({ type: 'expiry', label: p.customName || p.name || p.productInfo?.domain || p.domain || p.id, days })
+          }
+        }
+      })
+
+      const bal = user?.data?.balance?.amount ?? user?.data?.balance?.total
+      if (bal !== null && bal !== undefined && Number(bal) < 5) {
+        ns.push({ type: 'balance', label: `€${Number(bal).toFixed(2)}` })
+      }
+
+      setNotifs(ns)
+    }
+    compute()
+  }, [])
+
+  return (
+    <div className="notif-bell-wrap" ref={ref}>
+      <button className="notif-bell-btn" onClick={() => setOpen(v => !v)}>
+        <Ic ic={icons.bell} sz={16} />
+        {notifs.length > 0 && <span className="notif-badge">{notifs.length}</span>}
+      </button>
+      {open && (
+        <div className="notif-panel">
+          <div className="notif-panel-header">{t('notifications')}</div>
+          {notifs.length ? notifs.map((n, i) => (
+            <div key={i} className="notif-item">
+              <Ic ic={icons.alertTriangle} sz={14} />
+              <div>
+                <div className="notif-item-label">{n.label}</div>
+                {n.type === 'expiry' && <div className="notif-item-sub">{t('expiring_soon')} — {n.days} day{n.days !== 1 ? 's' : ''}</div>}
+                {n.type === 'balance' && <div className="notif-item-sub">{t('low_balance')}</div>}
+              </div>
+            </div>
+          )) : (
+            <div className="notif-empty">{t('no_notifications')}</div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function Titlebar() {
   const isMac = window.sk?.platform === 'darwin'
   return (
-    <div className="titlebar">
+    <div className="titlebar" style={!isMac ? {paddingRight:0} : {}}>
       {isMac ? (
         <div className="titlebar-controls">
           <button className="tb-btn tb-close" onClick={() => window.sk.winAction('close')} />
@@ -27,12 +173,29 @@ function Titlebar() {
         </div>
       ) : <div style={{width:8}} />}
       <span className="titlebar-title">Skrime Desktop</span>
+      <div className="titlebar-right">
+        <GlobalSearch />
+        <NotifBell />
+        {!isMac && (
+          <div className="win-controls">
+            <button className="win-btn" onClick={() => window.sk.winAction('min')}>
+              <svg viewBox="0 0 10 1" fill="currentColor"><rect width="10" height="1"/></svg>
+            </button>
+            <button className="win-btn" onClick={() => window.sk.winAction('max')}>
+              <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1"><rect x=".5" y=".5" width="9" height="9"/></svg>
+            </button>
+            <button className="win-btn win-btn-close" onClick={() => window.sk.winAction('close')}>
+              <svg viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round"><line x1="0" y1="0" x2="10" y2="10"/><line x1="10" y1="0" x2="0" y2="10"/></svg>
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
 
 function Sidebar() {
-  const { view, nav, t, logout, showModal, closeModal } = useApp()
+  const { view, nav, t, logout, showModal, closeModal, theme } = useApp()
 
   const items = navItems(t)
   const isActive = id => view === id || (id === 'servers' && view === 'server-detail') || (id === 'domains' && view === 'domain-detail')
@@ -51,7 +214,7 @@ function Sidebar() {
   return (
     <div className="sidebar">
       <div className="sidebar-logo">
-        <img src={logo} alt="Skrime" />
+        <img src={theme === 'dark' ? logoWhite : logo} alt="Skrime" />
       </div>
       <div className="sidebar-section-label">{t('products')}</div>
       {items.map(n => (

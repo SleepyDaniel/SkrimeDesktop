@@ -57,6 +57,6 @@ export const prodIcon = type => {
 export const apiOk = r => r?.state === 'success' || r?.statusCode === 200
 
 export const prodColor = type => {
-  const m = { server: 'var(--blue-l)', kvm: 'var(--blue-l)', dedicated: '#F0EBF8', domain: 'var(--green-l)', webspace: 'var(--amber-l)', teamspeak: 'var(--terra-l)', instance: 'var(--terra-l)', ssl: '#F5F0FF' }
+  const m = { server: 'var(--blue-l)', kvm: 'var(--blue-l)', dedicated: 'var(--purple-l)', domain: 'var(--green-l)', webspace: 'var(--amber-l)', teamspeak: 'var(--terra-l)', instance: 'var(--terra-l)', ssl: 'var(--violet-l)' }
   return m[(type || '').toLowerCase()] || 'var(--surface2)'
 }

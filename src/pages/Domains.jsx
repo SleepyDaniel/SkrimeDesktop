@@ -4,6 +4,96 @@ import { icons, Ic } from '../utils/icons'
 import { StatusBadge, Loading, ConfirmModal } from '../components/Shell'
 import { fmtDate, parseProducts, filterByType, apiOk } from '../utils/fmt'
 
+const DNS_TYPE_NUM = {1:'A',2:'NS',5:'CNAME',6:'SOA',12:'PTR',15:'MX',16:'TXT',28:'AAAA',33:'SRV',257:'CAA'}
+const dnsTypeNum = n => DNS_TYPE_NUM[n] || String(n)
+const dnsStatusText = c => ({0:'NOERROR',2:'SERVFAIL',3:'NXDOMAIN',5:'REFUSED'}[c] || `RCODE ${c}`)
+
+function DnsPropModal({ domName, closeModal }) {
+  const { t } = useApp()
+  const [name, setName] = useState(domName)
+  const [type, setType] = useState('A')
+  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState(null)
+  const [error, setError] = useState(null)
+
+  const check = async () => {
+    setLoading(true)
+    setResult(null)
+    setError(null)
+    try {
+      const r = await fetch(`https://dns.google/resolve?name=${encodeURIComponent(name)}&type=${encodeURIComponent(type)}`)
+      setResult(await r.json())
+    } catch {
+      setError('Failed to reach DNS resolver. Check your connection.')
+    }
+    setLoading(false)
+  }
+
+  return (
+    <div className="modal" style={{maxWidth:540}}>
+      <div className="modal-header"><h3>{t('dns_propagation')}</h3></div>
+      <div className="modal-body">
+        <div style={{display:'flex',gap:10,marginBottom:16}}>
+          <div className="form-group" style={{flex:1,marginBottom:0}}>
+            <label>{t('dns_hostname')}</label>
+            <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="example.com" />
+          </div>
+          <div className="form-group" style={{width:100,marginBottom:0}}>
+            <label>{t('dns_type')}</label>
+            <select value={type} onChange={e => setType(e.target.value)}>
+              {['A','AAAA','MX','TXT','CNAME','NS','SOA'].map(ty => <option key={ty}>{ty}</option>)}
+            </select>
+          </div>
+        </div>
+
+        {loading && (
+          <div style={{display:'flex',alignItems:'center',gap:10,color:'var(--text-muted)',fontSize:13,padding:'8px 0'}}>
+            <div className="spinner" />{t('dns_checking')}
+          </div>
+        )}
+
+        {result && !loading && (
+          <>
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:12}}>
+              <span className={`badge ${result.Status === 0 ? 'badge-green' : 'badge-red'}`}>{dnsStatusText(result.Status)}</span>
+              <span style={{fontSize:12.5,color:'var(--text-muted)'}}>{result.Answer?.length || 0} record{result.Answer?.length !== 1 ? 's' : ''} found</span>
+            </div>
+            {result.Answer?.length ? (
+              <div className="card" style={{overflow:'hidden'}}>
+                <table className="dns-table">
+                  <thead><tr><th>Name</th><th>{t('dns_type')}</th><th>{t('dns_content')}</th><th>TTL</th></tr></thead>
+                  <tbody>
+                    {result.Answer.map((a, i) => (
+                      <tr key={i}>
+                        <td className="mono">{a.name}</td>
+                        <td><span className="dns-type-badge">{dnsTypeNum(a.type)}</span></td>
+                        <td className="mono" style={{wordBreak:'break-all',maxWidth:200}}>{a.data}</td>
+                        <td style={{color:'var(--text-muted)'}}>{a.TTL}s</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <div className="empty-state" style={{padding:20}}>
+                <p>{t('dns_no_records')} ({name} {type})</p>
+              </div>
+            )}
+          </>
+        )}
+
+        {error && <div style={{color:'var(--terra-d)',fontSize:13,paddingTop:8}}>{error}</div>}
+      </div>
+      <div className="modal-footer">
+        <button className="btn btn-ghost" onClick={closeModal}>{t('cancel')}</button>
+        <button className="btn btn-primary" onClick={check} disabled={loading || !name.trim()}>
+          <Ic ic={icons.wifi} sz={14} /> {t('dns_check')}
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function DomainDetail({ domain, onBack }) {
   const { t, api, addToast, showModal, closeModal } = useApp()
   const [ns, setNs] = useState([])
@@ -102,7 +192,10 @@ function DomainDetail({ domain, onBack }) {
 
         {tab === 'dns' && (
           <>
-            <div style={{display:'flex',justifyContent:'flex-end',marginBottom:12}}>
+            <div style={{display:'flex',justifyContent:'flex-end',gap:8,marginBottom:12}}>
+              <button className="btn btn-ghost btn-sm" onClick={() => showModal(<DnsPropModal domName={domName} closeModal={closeModal} />)}>
+                <Ic ic={icons.wifi} sz={14} /> {t('dns_check_propagation')}
+              </button>
               <button className="btn btn-primary btn-sm" onClick={showAddDns}><Ic ic={icons.plus} sz={14} /> {t('add_record')}</button>
             </div>
             <div className="card">

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Ctx } from './ctx'
 import { i18n } from './i18n'
 import { Shell } from './components/Shell'
@@ -27,6 +27,7 @@ export default function App() {
   const [user, setUser] = useState(null)
   const [toasts, setToasts] = useState([])
   const [modal, setModal] = useState(null)
+  const [theme, setThemeState] = useState(localStorage.getItem('theme') || 'light')
 
   const tokenRef = useRef(token)
   const cacheRef = useRef({})
@@ -34,6 +35,9 @@ export default function App() {
   const t = k => (i18n[lang] || i18n.en)[k] || i18n.en[k] || k
 
   const setLang = l => { setLangState(l); localStorage.setItem('lang', l) }
+
+  const setTheme = t => { setThemeState(t); localStorage.setItem('theme', t) }
+  useEffect(() => { document.documentElement.setAttribute('data-theme', theme) }, [theme])
 
   const setToken = tk => {
     setTokenState(tk)
@@ -85,7 +89,7 @@ export default function App() {
   const showModal = node => setModal(node)
   const closeModal = () => setModal(null)
 
-  const ctx = { view, params, token, setToken, lang, t, setLang, user, setUser, nav, logout, addToast, api, cached, clearCache, showModal, closeModal }
+  const ctx = { view, params, token, setToken, lang, t, setLang, theme, setTheme, user, setUser, nav, logout, addToast, api, cached, clearCache, showModal, closeModal }
 
   const Page = pages[view] || Dashboard
 

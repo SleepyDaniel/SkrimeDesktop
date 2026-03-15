@@ -12,13 +12,6 @@ function mkWin() {
     minHeight: 640,
     frame: false,
     titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden',
-    ...(process.platform !== 'darwin' && {
-      titleBarOverlay: {
-        color: '#F9F7F2',
-        symbolColor: '#5A4F47',
-        height: 40
-      }
-    }),
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,

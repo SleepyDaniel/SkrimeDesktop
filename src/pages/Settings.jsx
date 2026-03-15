@@ -3,9 +3,10 @@ import { useApp } from '../ctx'
 import { icons, Ic } from '../utils/icons'
 import { ConfirmModal } from '../components/Shell'
 import logo from '../assets/logo.png'
+import logoWhite from '../assets/logoWhite.png'
 
 export default function Settings() {
-  const { t, lang, setLang, token, setToken, logout, addToast, clearCache, showModal, closeModal } = useApp()
+  const { t, lang, setLang, theme, setTheme, token, setToken, logout, addToast, clearCache, showModal, closeModal } = useApp()
   const [showKey, setShowKey] = useState(false)
   const [keyVal, setKeyVal] = useState(token)
 
@@ -27,6 +28,17 @@ export default function Settings() {
       </div>
       <div className="page-body animate-in">
         <div className="settings-section">
+
+          <h3>{t('appearance')}</h3>
+          <div className="card" style={{marginBottom:24}}>
+            <div className="settings-item">
+              <div>
+                <div className="settings-item-label">{t('dark_mode')}</div>
+                <div className="settings-item-desc">{t('dark_mode_desc')}</div>
+              </div>
+              <button className={`toggle ${theme === 'dark' ? 'on' : ''}`} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />
+            </div>
+          </div>
 
           <h3>{t('language')}</h3>
           <div className="card" style={{marginBottom:24}}>
@@ -79,7 +91,7 @@ export default function Settings() {
 
           <h3>{t('about')}</h3>
           <div className="about-card">
-            <img src={logo} alt="Skrime" className="about-logo" />
+            <img src={theme === 'dark' ? logoWhite : logo} alt="Skrime" className="about-logo" />
             <p style={{fontSize:13.5,color:'var(--text-mid)',lineHeight:1.6,marginBottom:8}}>
               <strong>Skrime Desktop</strong> — an open source desktop client for{' '}
               <a href="#" onClick={e => { e.preventDefault(); window.sk.openUrl('https://skrime.eu') }}>skrime.eu</a>{' '}

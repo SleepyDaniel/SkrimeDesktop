@@ -32,11 +32,11 @@ export default function Dashboard() {
 
   const stats = [
     { icon: 'server', label: t('servers'), count: filterByType(products,'server').length, color: 'var(--blue-l)', iconColor: 'var(--blue-d)', nav: 'servers' },
-    { icon: 'cpu', label: t('dedicated'), count: filterByType(products,'dedicated').length, color: '#F0EBF8', iconColor: '#8B6CBF', nav: 'dedicated' },
+    { icon: 'cpu', label: t('dedicated'), count: filterByType(products,'dedicated').length, color: 'var(--purple-l)', iconColor: '#8B6CBF', nav: 'dedicated' },
     { icon: 'globe', label: t('domains'), count: filterByType(products,'domain').length, color: 'var(--green-l)', iconColor: 'var(--green-d)', nav: 'domains' },
     { icon: 'layers', label: t('webspace'), count: filterByType(products,'webspace').length, color: 'var(--amber-l)', iconColor: '#B8871F', nav: 'webspace' },
     { icon: 'headphones', label: t('teamspeak'), count: filterByType(products,'teamspeak').length, color: 'var(--terra-l)', iconColor: 'var(--terra-d)', nav: 'teamspeak' },
-    { icon: 'shield', label: t('ssl'), count: filterByType(products,'ssl').length, color: '#F5F0FF', iconColor: '#7C5CBF', nav: 'ssl' },
+    { icon: 'shield', label: t('ssl'), count: filterByType(products,'ssl').length, color: 'var(--violet-l)', iconColor: '#7C5CBF', nav: 'ssl' },
   ]
 
   return (
