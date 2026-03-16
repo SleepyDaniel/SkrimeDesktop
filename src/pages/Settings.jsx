@@ -4,6 +4,7 @@ import { icons, Ic } from '../utils/icons'
 import { ConfirmModal } from '../components/Shell'
 import logo from '../assets/logo.png'
 import logoWhite from '../assets/logoWhite.png'
+import pkg from '../../package.json'
 
 export default function Settings() {
   const { t, lang, setLang, theme, setTheme, token, setToken, logout, addToast, clearCache, showModal, closeModal } = useApp()
@@ -118,6 +119,9 @@ export default function Settings() {
             </div>
             <p style={{fontSize:12,color:'var(--text-muted)',marginTop:16}}>
               Made by <a href="#" onClick={e => { e.preventDefault(); window.sk.openUrl("https://github.com/SleepyDaniel/SkrimeDesktop") }}>SleepyDan</a> — MIT License
+            </p>
+            <p style={{fontSize:12,color:'var(--text-muted)',marginTop:6}}>
+              {t('version')} {pkg.version}
             </p>
           </div>
 

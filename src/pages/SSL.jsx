@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../ctx'
 import { icons, Ic } from '../utils/icons'
-import { StatusBadge, Loading } from '../components/Shell'
-import { fmtDate, parseProducts, filterByType } from '../utils/fmt'
+import { StatusBadge, Loading, ExpiryBadge, ListControls } from '../components/Shell'
+import { fmtDate, parseProducts, filterByType, applyListControls } from '../utils/fmt'
 
 function SSLDetail({ cert, onBack }) {
   const { t, api, addToast } = useApp()
@@ -77,6 +77,8 @@ export default function SSL() {
   const [certs, setCerts] = useState([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
+  const [sort, setSort] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
 
   const load = async () => {
     setLoading(true)
@@ -88,6 +90,8 @@ export default function SSL() {
 
   if (selected) return <SSLDetail cert={selected} onBack={() => setSelected(null)} />
 
+  const displayed = applyListControls(certs, sort, statusFilter)
+
   return (
     <>
       <div className="page-header">
@@ -98,18 +102,25 @@ export default function SSL() {
       </div>
       <div className="page-body animate-in">
         {loading ? <Loading /> : (
-          <div className="card">
-            {certs.length ? certs.map(c => (
-              <div key={c.id} className="product-row" onClick={() => setSelected(c)}>
-                <div className="product-row-icon" style={{background:'#F5F0FF',color:'#7C5CBF'}}><Ic ic={icons.shield} sz={18} /></div>
-                <div className="product-row-main">
-                  <div className="product-row-name">{c.customName || c.id}</div>
-                  <div className="product-row-sub">{t('expires')}: {fmtDate(c.expireAt || c.expire)}</div>
+          <>
+            <ListControls sort={sort} setSort={setSort} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
+            <div className="card">
+              {displayed.length ? displayed.map(c => (
+                <div key={c.id} className="product-row" onClick={() => setSelected(c)}>
+                  <div className="product-row-icon" style={{background:'#F5F0FF',color:'#7C5CBF'}}><Ic ic={icons.shield} sz={18} /></div>
+                  <div className="product-row-main">
+                    <div className="product-row-name">{c.customName || c.id}</div>
+                    <div className="product-row-sub">{t('expires')}: {fmtDate(c.expireAt || c.expire)}</div>
+                  </div>
+                  <div className="product-row-right">
+                    <ExpiryBadge product={c} />
+                    <StatusBadge status={c.state || c.status} />
+                    <Ic ic={icons.chevron} sz={16} />
+                  </div>
                 </div>
-                <div className="product-row-right"><StatusBadge status={c.state || c.status} /><Ic ic={icons.chevron} sz={16} /></div>
-              </div>
-            )) : <div className="empty-state"><Ic ic={icons.shield} sz={44} /><h3>{t('no_ssl')}</h3></div>}
-          </div>
+              )) : <div className="empty-state"><Ic ic={icons.shield} sz={44} /><h3>{t('no_ssl')}</h3></div>}
+            </div>
+          </>
         )}
       </div>
     </>

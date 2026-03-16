@@ -1,7 +1,8 @@
 {
   "name": "skrime-desktop",
-  "version": "1.0.0",
+  "version": "1.0.4",
   "description": "Skrime.eu desktop app",
+  "author": "SleepyDaniel",
   "main": "main.js",
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on tcp:5173 && cross-env NODE_ENV=development electron .\"",

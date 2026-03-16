@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../ctx'
 import { icons, Ic } from '../utils/icons'
-import { StatusBadge, Loading } from '../components/Shell'
-import { fmtDate, parseProducts, filterByType, apiOk } from '../utils/fmt'
+import { StatusBadge, Loading, ExpiryBadge, ListControls } from '../components/Shell'
+import { fmtDate, parseProducts, filterByType, apiOk, applyListControls } from '../utils/fmt'
 
 function WebspaceDetail({ ws, onBack }) {
   const { t, api, addToast, showModal, closeModal } = useApp()
@@ -98,6 +98,8 @@ export default function Webspace() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
+  const [sort, setSort] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
 
   const load = async () => {
     setLoading(true)
@@ -109,6 +111,8 @@ export default function Webspace() {
 
   if (selected) return <WebspaceDetail ws={selected} onBack={() => setSelected(null)} />
 
+  const displayed = applyListControls(items, sort, statusFilter)
+
   return (
     <>
       <div className="page-header">
@@ -119,18 +123,25 @@ export default function Webspace() {
       </div>
       <div className="page-body animate-in">
         {loading ? <Loading /> : (
-          <div className="card">
-            {items.length ? items.map(w => (
-              <div key={w.id} className="product-row" onClick={() => setSelected(w)}>
-                <div className="product-row-icon" style={{background:'var(--amber-l)',color:'#B8871F'}}><Ic ic={icons.layers} sz={18} /></div>
-                <div className="product-row-main">
-                  <div className="product-row-name">{w.customName || w.id}</div>
-                  <div className="product-row-sub">{w.productInfo?.domain || w.type || ''}</div>
+          <>
+            <ListControls sort={sort} setSort={setSort} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
+            <div className="card">
+              {displayed.length ? displayed.map(w => (
+                <div key={w.id} className="product-row" onClick={() => setSelected(w)}>
+                  <div className="product-row-icon" style={{background:'var(--amber-l)',color:'#B8871F'}}><Ic ic={icons.layers} sz={18} /></div>
+                  <div className="product-row-main">
+                    <div className="product-row-name">{w.customName || w.id}</div>
+                    <div className="product-row-sub">{w.productInfo?.domain || w.type || ''}</div>
+                  </div>
+                  <div className="product-row-right">
+                    <ExpiryBadge product={w} />
+                    <StatusBadge status={w.state || w.status} />
+                    <Ic ic={icons.chevron} sz={16} />
+                  </div>
                 </div>
-                <div className="product-row-right"><StatusBadge status={w.state || w.status} /><Ic ic={icons.chevron} sz={16} /></div>
-              </div>
-            )) : <div className="empty-state"><Ic ic={icons.layers} sz={44} /><h3>{t('no_webspace')}</h3></div>}
-          </div>
+              )) : <div className="empty-state"><Ic ic={icons.layers} sz={44} /><h3>{t('no_webspace')}</h3></div>}
+            </div>
+          </>
         )}
       </div>
     </>

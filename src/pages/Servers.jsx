@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../ctx'
 import { icons, Ic } from '../utils/icons'
-import { StatusBadge, Loading, ConfirmModal } from '../components/Shell'
-import { fmtDate, fmtBytes, parseProducts, filterByType } from '../utils/fmt'
+import { StatusBadge, Loading, ConfirmModal, ExpiryBadge, ListControls } from '../components/Shell'
+import { LogsTab, AccessTab } from '../components/ProductTabs'
+import { fmtDate, fmtBytes, parseProducts, filterByType, applyListControls } from '../utils/fmt'
 
 function ServerDetail({ server, onBack }) {
   const { t, api, cached, clearCache, addToast, showModal, closeModal } = useApp()
@@ -11,6 +12,7 @@ function ServerDetail({ server, onBack }) {
   const [stats, setStats] = useState({})
   const [loading, setLoading] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
+  const [tab, setTab] = useState('overview')
 
   const load = async () => {
     setLoading(true)
@@ -196,7 +198,14 @@ function ServerDetail({ server, onBack }) {
         </div>
       </div>
       <div className="page-body animate-in">
-        <div className="detail-panel">
+        <div className="tabs" style={{marginBottom:20}}>
+          <button className={`tab-btn${tab==='overview'?' active':''}`} onClick={() => setTab('overview')}>Overview</button>
+          <button className={`tab-btn${tab==='logs'?' active':''}`} onClick={() => setTab('logs')}>{t('logs')}</button>
+          <button className={`tab-btn${tab==='access'?' active':''}`} onClick={() => setTab('access')}>{t('access')}</button>
+        </div>
+        {tab === 'logs' && <LogsTab productId={server.id} />}
+        {tab === 'access' && <AccessTab productId={server.id} />}
+        {tab !== 'overview' ? null : <div className="detail-panel">
           <div>
             <div className="action-bar" style={{marginBottom:20}}>
               <button className="btn btn-green btn-sm" disabled={isRunning} onClick={() => action('start')}><Ic ic={icons.power} sz={14} /> {t('start')}</button>
@@ -264,7 +273,7 @@ function ServerDetail({ server, onBack }) {
               </div>
             </div>
           </div>
-        </div>
+        </div>}
       </div>
     </>
   )
@@ -275,6 +284,8 @@ export default function Servers() {
   const [servers, setServers] = useState([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
+  const [sort, setSort] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
 
   const load = async () => {
     setLoading(true)
@@ -286,6 +297,8 @@ export default function Servers() {
 
   if (selected) return <ServerDetail server={selected} onBack={() => { clearCache(`srv-info-${selected.id}`); setSelected(null) }} />
 
+  const displayed = applyListControls(servers, sort, statusFilter)
+
   return (
     <>
       <div className="page-header">
@@ -296,25 +309,32 @@ export default function Servers() {
       </div>
       <div className="page-body animate-in">
         {loading ? <Loading /> : (
-          <div className="card">
-            {servers.length ? servers.map(s => (
-              <div key={s.id} className="product-row" onClick={() => setSelected(s)}>
-                <div className="product-row-icon" style={{background:'var(--blue-l)',color:'var(--blue-d)'}}><Ic ic={icons.server} sz={18} /></div>
-                <div className="product-row-main">
-                  <div className="product-row-name">{s.customName || s.name || s.id}</div>
-                  <div className="product-row-sub mono">{s.type || ''}</div>
+          <>
+            <ListControls sort={sort} setSort={setSort} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
+            <div className="card">
+              {displayed.length ? displayed.map(s => (
+                <div key={s.id} className="product-row" onClick={() => setSelected(s)}>
+                  <div className="product-row-icon" style={{background:'var(--blue-l)',color:'var(--blue-d)'}}><Ic ic={icons.server} sz={18} /></div>
+                  <div className="product-row-main">
+                    <div className="product-row-name">{s.customName || s.name || s.id}</div>
+                    <div className="product-row-sub mono">{s.type || ''}</div>
+                  </div>
+                  <div className="product-row-right">
+                    <ExpiryBadge product={s} />
+                    <StatusBadge status={s.state || s.status} />
+                    <Ic ic={icons.chevron} sz={16} />
+                  </div>
                 </div>
-                <div className="product-row-right"><StatusBadge status={s.state || s.status} /><Ic ic={icons.chevron} sz={16} /></div>
-              </div>
-            )) : (
-              <div className="empty-state">
-                <Ic ic={icons.server} sz={44} />
-                <h3>{t('no_servers')}</h3>
-                <p>{t('no_servers_sub')}</p>
-                <a href="#" className="btn btn-blue" style={{marginTop:8}} onClick={e => { e.preventDefault(); window.sk.openUrl('https://skrime.eu/') }}><Ic ic={icons.plus} sz={16} /> Order Server</a>
-              </div>
-            )}
-          </div>
+              )) : (
+                <div className="empty-state">
+                  <Ic ic={icons.server} sz={44} />
+                  <h3>{t('no_servers')}</h3>
+                  <p>{t('no_servers_sub')}</p>
+                  <a href="#" className="btn btn-primary" style={{marginTop:8}} onClick={e => { e.preventDefault(); window.sk.openUrl('https://skrime.eu/') }}><Ic ic={icons.plus} sz={16} /> Order Server</a>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </>

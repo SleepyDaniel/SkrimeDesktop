@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../ctx'
 import { icons, Ic } from '../utils/icons'
-import { StatusBadge, Loading, ConfirmModal } from '../components/Shell'
-import { fmtDate, parseProducts, filterByType, apiOk } from '../utils/fmt'
+import { StatusBadge, Loading, ConfirmModal, ExpiryBadge, ListControls } from '../components/Shell'
+import { fmtDate, parseProducts, filterByType, apiOk, applyListControls } from '../utils/fmt'
 
 const DNS_TYPE_NUM = {1:'A',2:'NS',5:'CNAME',6:'SOA',12:'PTR',15:'MX',16:'TXT',28:'AAAA',33:'SRV',257:'CAA'}
 const dnsTypeNum = n => DNS_TYPE_NUM[n] || String(n)
@@ -258,6 +258,8 @@ export default function Domains() {
   const [domains, setDomains] = useState([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
+  const [sort, setSort] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
 
   const load = async () => {
     setLoading(true)
@@ -269,6 +271,8 @@ export default function Domains() {
 
   if (selected) return <DomainDetail domain={selected} onBack={() => setSelected(null)} />
 
+  const displayed = applyListControls(domains, sort, statusFilter)
+
   return (
     <>
       <div className="page-header">
@@ -279,18 +283,25 @@ export default function Domains() {
       </div>
       <div className="page-body animate-in">
         {loading ? <Loading /> : (
-          <div className="card">
-            {domains.length ? domains.map(d => (
-              <div key={d.id} className="product-row" onClick={() => setSelected(d)}>
-                <div className="product-row-icon" style={{background:'var(--green-l)',color:'var(--green-d)'}}><Ic ic={icons.globe} sz={18} /></div>
-                <div className="product-row-main">
-                  <div className="product-row-name">{d.productInfo?.domain || d.customName || d.id}</div>
-                  <div className="product-row-sub">{t('expires')}: {fmtDate(d.expireAt || d.expire)}</div>
+          <>
+            <ListControls sort={sort} setSort={setSort} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
+            <div className="card">
+              {displayed.length ? displayed.map(d => (
+                <div key={d.id} className="product-row" onClick={() => setSelected(d)}>
+                  <div className="product-row-icon" style={{background:'var(--green-l)',color:'var(--green-d)'}}><Ic ic={icons.globe} sz={18} /></div>
+                  <div className="product-row-main">
+                    <div className="product-row-name">{d.productInfo?.domain || d.customName || d.id}</div>
+                    <div className="product-row-sub">{t('expires')}: {fmtDate(d.expireAt || d.expire)}</div>
+                  </div>
+                  <div className="product-row-right">
+                    <ExpiryBadge product={d} />
+                    <StatusBadge status={d.state || d.status} />
+                    <Ic ic={icons.chevron} sz={16} />
+                  </div>
                 </div>
-                <div className="product-row-right"><StatusBadge status={d.state || d.status} /><Ic ic={icons.chevron} sz={16} /></div>
-              </div>
-            )) : <div className="empty-state"><Ic ic={icons.globe} sz={44} /><h3>{t('no_domains')}</h3><p>{t('no_domains_sub')}</p></div>}
-          </div>
+              )) : <div className="empty-state"><Ic ic={icons.globe} sz={44} /><h3>{t('no_domains')}</h3><p>{t('no_domains_sub')}</p></div>}
+            </div>
+          </>
         )}
       </div>
     </>

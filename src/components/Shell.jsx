@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useApp } from '../ctx'
 import { icons, Ic } from '../utils/icons'
-import { parseProducts, prodNav, prodIcon, prodColor } from '../utils/fmt'
+import { parseProducts, prodNav, prodIcon, prodColor, daysUntil } from '../utils/fmt'
 import logo from '../assets/logo.png'
 import logoWhite from '../assets/logoWhite.png'
 
@@ -286,4 +286,33 @@ export function StatusBadge({ status }) {
 
 export function Loading() {
   return <div className="loading-full"><div className="spinner spinner-lg" /></div>
+}
+
+export function ExpiryBadge({ product }) {
+  const { t } = useApp()
+  const exp = product?.expireAt || product?.expire
+  if (!exp) return null
+  const days = daysUntil(exp)
+  if (days === null || days < 0 || days > 7) return null
+  const label = days === 0 ? t('expires_today') : t('expiring_in').replace('{n}', days)
+  return <span className={`badge-expiry${days <= 1 ? ' urgent' : ''}`}>{label}</span>
+}
+
+export function ListControls({ sort, setSort, statusFilter, setStatusFilter }) {
+  const { t } = useApp()
+  return (
+    <div className="list-controls">
+      <select value={sort} onChange={e => setSort(e.target.value)}>
+        <option value="">{t('sort_by')}</option>
+        <option value="name_az">{t('sort_name_az')}</option>
+        <option value="name_za">{t('sort_name_za')}</option>
+        <option value="expiry">{t('sort_expiry')}</option>
+      </select>
+      <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+        <option value="">{t('filter_all')}</option>
+        <option value="active">{t('active')}</option>
+        <option value="inactive">{t('stopped')}</option>
+      </select>
+    </div>
+  )
 }

@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../ctx'
 import { icons, Ic } from '../utils/icons'
-import { StatusBadge, Loading, ConfirmModal } from '../components/Shell'
-import { parseProducts, filterByType, apiOk } from '../utils/fmt'
+import { StatusBadge, Loading, ConfirmModal, ExpiryBadge, ListControls } from '../components/Shell'
+import { parseProducts, filterByType, apiOk, applyListControls } from '../utils/fmt'
 
 function TSDetail({ ts, onBack }) {
   const { t, api, addToast, showModal, closeModal } = useApp()
@@ -150,6 +150,8 @@ export default function TeamSpeak() {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
+  const [sort, setSort] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
 
   const load = async () => {
     setLoading(true)
@@ -161,6 +163,8 @@ export default function TeamSpeak() {
 
   if (selected) return <TSDetail ts={selected} onBack={() => setSelected(null)} />
 
+  const displayed = applyListControls(items, sort, statusFilter)
+
   return (
     <>
       <div className="page-header">
@@ -171,18 +175,25 @@ export default function TeamSpeak() {
       </div>
       <div className="page-body animate-in">
         {loading ? <Loading /> : (
-          <div className="card">
-            {items.length ? items.map(ts => (
-              <div key={ts.id} className="product-row" onClick={() => setSelected(ts)}>
-                <div className="product-row-icon" style={{background:'var(--terra-l)',color:'var(--terra-d)'}}><Ic ic={icons.headphones} sz={18} /></div>
-                <div className="product-row-main">
-                  <div className="product-row-name">{ts.customName || ts.id}</div>
-                  <div className="product-row-sub">{ts.type || ''}</div>
+          <>
+            <ListControls sort={sort} setSort={setSort} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
+            <div className="card">
+              {displayed.length ? displayed.map(ts => (
+                <div key={ts.id} className="product-row" onClick={() => setSelected(ts)}>
+                  <div className="product-row-icon" style={{background:'var(--terra-l)',color:'var(--terra-d)'}}><Ic ic={icons.headphones} sz={18} /></div>
+                  <div className="product-row-main">
+                    <div className="product-row-name">{ts.customName || ts.id}</div>
+                    <div className="product-row-sub">{ts.type || ''}</div>
+                  </div>
+                  <div className="product-row-right">
+                    <ExpiryBadge product={ts} />
+                    <StatusBadge status={ts.state || ts.status} />
+                    <Ic ic={icons.chevron} sz={16} />
+                  </div>
                 </div>
-                <div className="product-row-right"><StatusBadge status={ts.state || ts.status} /><Ic ic={icons.chevron} sz={16} /></div>
-              </div>
-            )) : <div className="empty-state"><Ic ic={icons.headphones} sz={44} /><h3>{t('no_teamspeak')}</h3></div>}
-          </div>
+              )) : <div className="empty-state"><Ic ic={icons.headphones} sz={44} /><h3>{t('no_teamspeak')}</h3></div>}
+            </div>
+          </>
         )}
       </div>
     </>

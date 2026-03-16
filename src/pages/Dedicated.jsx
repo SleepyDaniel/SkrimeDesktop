@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useApp } from '../ctx'
 import { icons, Ic } from '../utils/icons'
-import { StatusBadge, Loading, ConfirmModal } from '../components/Shell'
-import { fmtDate, parseProducts, filterByType, apiOk } from '../utils/fmt'
+import { StatusBadge, Loading, ConfirmModal, ExpiryBadge, ListControls } from '../components/Shell'
+import { fmtDate, parseProducts, filterByType, apiOk, applyListControls } from '../utils/fmt'
 
 function DedicatedDetail({ server, onBack }) {
   const { t, api, cached, clearCache, addToast, showModal, closeModal } = useApp()
@@ -143,6 +143,8 @@ export default function Dedicated() {
   const [servers, setServers] = useState([])
   const [loading, setLoading] = useState(true)
   const [selected, setSelected] = useState(null)
+  const [sort, setSort] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
 
   const load = async () => {
     setLoading(true)
@@ -154,6 +156,8 @@ export default function Dedicated() {
 
   if (selected) return <DedicatedDetail server={selected} onBack={() => { clearCache(`ded-info-${selected.id}`); setSelected(null) }} />
 
+  const displayed = applyListControls(servers, sort, statusFilter)
+
   return (
     <>
       <div className="page-header">
@@ -164,18 +168,25 @@ export default function Dedicated() {
       </div>
       <div className="page-body animate-in">
         {loading ? <Loading /> : (
-          <div className="card">
-            {servers.length ? servers.map(s => (
-              <div key={s.id} className="product-row" onClick={() => setSelected(s)}>
-                <div className="product-row-icon" style={{background:'#F0EBF8',color:'#8B6CBF'}}><Ic ic={icons.cpu} sz={18} /></div>
-                <div className="product-row-main">
-                  <div className="product-row-name">{s.customName || s.name || s.id}</div>
-                  <div className="product-row-sub">{s.type || ''}</div>
+          <>
+            <ListControls sort={sort} setSort={setSort} statusFilter={statusFilter} setStatusFilter={setStatusFilter} />
+            <div className="card">
+              {displayed.length ? displayed.map(s => (
+                <div key={s.id} className="product-row" onClick={() => setSelected(s)}>
+                  <div className="product-row-icon" style={{background:'#F0EBF8',color:'#8B6CBF'}}><Ic ic={icons.cpu} sz={18} /></div>
+                  <div className="product-row-main">
+                    <div className="product-row-name">{s.customName || s.name || s.id}</div>
+                    <div className="product-row-sub">{s.type || ''}</div>
+                  </div>
+                  <div className="product-row-right">
+                    <ExpiryBadge product={s} />
+                    <StatusBadge status={s.state || s.status} />
+                    <Ic ic={icons.chevron} sz={16} />
+                  </div>
                 </div>
-                <div className="product-row-right"><StatusBadge status={s.state || s.status} /><Ic ic={icons.chevron} sz={16} /></div>
-              </div>
-            )) : <div className="empty-state"><Ic ic={icons.cpu} sz={44} /><h3>{t('no_dedicated')}</h3></div>}
-          </div>
+              )) : <div className="empty-state"><Ic ic={icons.cpu} sz={44} /><h3>{t('no_dedicated')}</h3></div>}
+            </div>
+          </>
         )}
       </div>
     </>
