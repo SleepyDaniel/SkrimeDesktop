@@ -1,6 +1,6 @@
 {
   "name": "skrime-desktop",
-  "version": "1.0.4",
+  "version": "1.0.0",
   "description": "Skrime.eu desktop app",
   "author": "SleepyDaniel",
   "main": "main.js",
