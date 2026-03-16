@@ -44,16 +44,12 @@ export default function Settings() {
           <h3>{t('language')}</h3>
           <div className="card" style={{marginBottom:24}}>
             <div className="settings-item">
-              <div><div className="settings-item-label">English</div></div>
-              <button className={`btn ${lang==='en' ? 'btn-primary' : 'btn-ghost'} btn-sm`} onClick={() => setLang('en')}>
-                {lang === 'en' ? <><Ic ic={icons.check} sz={14} /> Active</> : 'Select'}
-              </button>
-            </div>
-            <div className="settings-item">
-              <div><div className="settings-item-label">Svenska</div></div>
-              <button className={`btn ${lang==='sv' ? 'btn-primary' : 'btn-ghost'} btn-sm`} onClick={() => setLang('sv')}>
-                {lang === 'sv' ? <><Ic ic={icons.check} sz={14} /> Aktiv</> : 'Välj'}
-              </button>
+              <div><div className="settings-item-label">{t('language')}</div></div>
+              <select className="settings-select" value={lang} onChange={e => setLang(e.target.value)}>
+                <option value="en">English</option>
+                <option value="sv">Svenska</option>
+                <option value="de">Deutsch</option>
+              </select>
             </div>
           </div>
 
