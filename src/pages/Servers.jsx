@@ -13,6 +13,8 @@ function ServerDetail({ server, onBack }) {
   const [loading, setLoading] = useState(true)
   const [showPassword, setShowPassword] = useState(false)
   const [tab, setTab] = useState('overview')
+  const [consoleUrl, setConsoleUrl] = useState(null)
+  const [consoleLoading, setConsoleLoading] = useState(false)
 
   const load = async () => {
     setLoading(true)
@@ -72,10 +74,14 @@ function ServerDetail({ server, onBack }) {
   }
 
   const openConsole = async () => {
+    setTab('console')
+    if (consoleUrl) return
+    setConsoleLoading(true)
     const r = await api('GET', 'server/novnc', { productId: server.id })
     const url = r?.data?.url || (typeof r?.data === 'string' ? r.data : null)
-    if (url) window.sk.openConsole(url)
-    else addToast(t('error_action'), 'error')
+    if (url) setConsoleUrl(url)
+    else { addToast(t('error_action'), 'error'); setTab('overview') }
+    setConsoleLoading(false)
   }
 
   const copy = text => { navigator.clipboard.writeText(text); addToast(t('copied'), 'success', 1500) }
@@ -202,6 +208,7 @@ function ServerDetail({ server, onBack }) {
           <button className={`tab-btn${tab==='overview'?' active':''}`} onClick={() => setTab('overview')}>Overview</button>
           <button className={`tab-btn${tab==='logs'?' active':''}`} onClick={() => setTab('logs')}>{t('logs')}</button>
           <button className={`tab-btn${tab==='access'?' active':''}`} onClick={() => setTab('access')}>{t('access')}</button>
+          <button className={`tab-btn${tab==='console'?' active':''}`} style={{marginLeft:'auto'}} onClick={openConsole}><Ic ic={icons.terminal} sz={13} /> {t('console')}</button>
         </div>
         {tab === 'logs' && <LogsTab productId={server.id} />}
         {tab === 'access' && <AccessTab productId={server.id} />}
@@ -211,8 +218,6 @@ function ServerDetail({ server, onBack }) {
               <button className="btn btn-green btn-sm" disabled={isRunning} onClick={() => action('start')}><Ic ic={icons.power} sz={14} /> {t('start')}</button>
               <button className="btn btn-terra btn-sm" disabled={!isRunning} onClick={() => action('stop')}><Ic ic={icons.power} sz={14} /> {t('stop')}</button>
               <button className="btn btn-ghost btn-sm" onClick={() => action('restart')}><Ic ic={icons.refresh} sz={14} /> {t('restart')}</button>
-              <div className="separator" />
-              <button className="btn btn-ghost btn-sm" onClick={openConsole}><Ic ic={icons.terminal} sz={14} /> {t('console')}</button>
             </div>
             <div className="card card-p detail-section">
               <div className="detail-section"><h3>Info</h3>
@@ -254,9 +259,6 @@ function ServerDetail({ server, onBack }) {
             </div>
           </div>
           <div>
-            <div className="card card-p" style={{marginBottom:16}}>
-              <button className="novnc-btn" onClick={openConsole}><Ic ic={icons.terminal} sz={18} /> {t('console')}</button>
-            </div>
             <div className="card card-p">
               <div className="detail-section"><h3>{t('stats')}</h3>
                 <div className="stat-row"><span className="stat-row-label">{t('cpu_usage')}</span><div className="stat-row-bar">{pct(statCpuPct)}</div><span className="stat-row-val">{statCpuPct.toFixed(1)}%</span></div>
@@ -275,6 +277,25 @@ function ServerDetail({ server, onBack }) {
           </div>
         </div>}
       </div>
+
+      {tab === 'console' && (
+        <div className="console-tab-frame">
+          <div className="console-tab-bar">
+            <button className="back-btn" onClick={onBack}><Ic ic={icons.chevron} sz={14} /> {t('back')}</button>
+            <span className="console-tab-bar-title">{server.customName || server.name || server.id}</span>
+            <div className="tabs">
+              <button className="tab-btn" onClick={() => setTab('overview')}>Overview</button>
+              <button className="tab-btn" onClick={() => setTab('logs')}>{t('logs')}</button>
+              <button className="tab-btn" onClick={() => setTab('access')}>{t('access')}</button>
+              <button className="tab-btn active"><Ic ic={icons.terminal} sz={13} /> {t('console')}</button>
+            </div>
+          </div>
+          {consoleLoading
+            ? <div className="loading-full" style={{background:'#0d0d0d'}}><div className="spinner spinner-lg" /></div>
+            : consoleUrl ? <webview src={consoleUrl} className="console-webview-tab" allowpopups="" /> : null
+          }
+        </div>
+      )}
     </>
   )
 }

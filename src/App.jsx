@@ -28,6 +28,9 @@ export default function App() {
   const [toasts, setToasts] = useState([])
   const [modal, setModal] = useState(null)
   const [theme, setThemeState] = useState(localStorage.getItem('theme') || 'light')
+  const [offline, setOffline] = useState(!navigator.onLine)
+  const [updateReady, setUpdateReady] = useState(false)
+  const [updateAvailable, setUpdateAvailable] = useState(false)
 
   const tokenRef = useRef(token)
   const cacheRef = useRef({})
@@ -38,6 +41,20 @@ export default function App() {
 
   const setTheme = t => { setThemeState(t); localStorage.setItem('theme', t) }
   useEffect(() => { document.documentElement.setAttribute('data-theme', theme) }, [theme])
+
+  useEffect(() => {
+    const on = () => setOffline(false)
+    const off = () => setOffline(true)
+    window.addEventListener('online', on)
+    window.addEventListener('offline', off)
+    return () => { window.removeEventListener('online', on); window.removeEventListener('offline', off) }
+  }, [])
+
+  useEffect(() => {
+    if (!window.sk?.onUpdateAvailable) return
+    window.sk.onUpdateAvailable(() => setUpdateAvailable(true))
+    window.sk.onUpdateDownloaded(() => { setUpdateAvailable(false); setUpdateReady(true) })
+  }, [])
 
   const setToken = tk => {
     setTokenState(tk)
@@ -89,7 +106,7 @@ export default function App() {
   const showModal = node => setModal(node)
   const closeModal = () => setModal(null)
 
-  const ctx = { view, params, token, setToken, lang, t, setLang, theme, setTheme, user, setUser, nav, logout, addToast, api, cached, clearCache, showModal, closeModal }
+  const ctx = { view, params, token, setToken, lang, t, setLang, theme, setTheme, user, setUser, nav, logout, addToast, api, cached, clearCache, showModal, closeModal, offline, updateReady, updateAvailable }
 
   const Page = pages[view] || Dashboard
 

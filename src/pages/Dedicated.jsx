@@ -9,6 +9,9 @@ function DedicatedDetail({ server, onBack }) {
   const [info, setInfo] = useState({})
   const [net, setNet] = useState({})
   const [loading, setLoading] = useState(true)
+  const [consoleUrl, setConsoleUrl] = useState(null)
+  const [consoleLoading, setConsoleLoading] = useState(false)
+  const [showConsole, setShowConsole] = useState(false)
 
   const load = async () => {
     setLoading(true)
@@ -51,10 +54,14 @@ function DedicatedDetail({ server, onBack }) {
   }
 
   const openConsole = async () => {
+    setShowConsole(true)
+    if (consoleUrl) return
+    setConsoleLoading(true)
     const r = await api('POST', 'dedicated/novnc', { productId: server.id })
     const url = r?.data?.url
-    if (url) window.sk.openConsole(url)
-    else addToast(t('error_action'), 'error')
+    if (url) setConsoleUrl(url)
+    else { addToast(t('error_action'), 'error'); setShowConsole(false) }
+    setConsoleLoading(false)
   }
 
   const showRdnsModal = () => {
@@ -134,6 +141,23 @@ function DedicatedDetail({ server, onBack }) {
           </div>
         </div>
       </div>
+
+      {showConsole && (
+        <div className="console-tab-frame">
+          <div className="console-tab-bar">
+            <button className="back-btn" onClick={onBack}><Ic ic={icons.chevron} sz={14} /> {t('back')}</button>
+            <span className="console-tab-bar-title">{server.customName || server.name || server.id}</span>
+            <div className="tabs" style={{marginLeft:'auto'}}>
+              <button className="tab-btn" onClick={() => setShowConsole(false)}>Overview</button>
+              <button className="tab-btn active"><Ic ic={icons.terminal} sz={13} /> {t('console')}</button>
+            </div>
+          </div>
+          {consoleLoading
+            ? <div className="loading-full" style={{background:'#0d0d0d'}}><div className="spinner spinner-lg" /></div>
+            : consoleUrl ? <webview src={consoleUrl} className="console-webview-tab" allowpopups="" /> : null
+          }
+        </div>
+      )}
     </>
   )
 }

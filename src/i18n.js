@@ -199,6 +199,12 @@ export const i18n = {
     expiring_in: 'Expires in {n} days',
     expires_today: 'Expires today',
     version: 'Version',
+    offline: 'No internet connection',
+    update_downloading: 'Downloading update...',
+    update_ready: 'Update ready to install.',
+    restart_install: 'Restart & Install',
+    console_title: 'Server Console',
+    close_console: 'Close',
   },
   sv: {
     welcome: 'Välkommen tillbaka',
@@ -400,6 +406,12 @@ export const i18n = {
     expiring_in: 'Går ut om {n} dagar',
     expires_today: 'Går ut idag',
     version: 'Version',
+    offline: 'Ingen internetanslutning',
+    update_downloading: 'Laddar ner uppdatering...',
+    update_ready: 'Uppdatering redo att installeras.',
+    restart_install: 'Starta om & Installera',
+    console_title: 'Serverkonsol',
+    close_console: 'Stäng',
   },
   de: {
     welcome: 'Willkommen zurück',
@@ -601,5 +613,11 @@ export const i18n = {
     expiring_in: 'Läuft in {n} Tagen ab',
     expires_today: 'Läuft heute ab',
     version: 'Version',
+    offline: 'Keine Internetverbindung',
+    update_downloading: 'Update wird heruntergeladen...',
+    update_ready: 'Update bereit zur Installation.',
+    restart_install: 'Neu starten & Installieren',
+    console_title: 'Server-Konsole',
+    close_console: 'Schließen',
   }
 }

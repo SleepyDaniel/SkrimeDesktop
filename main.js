@@ -3,6 +3,18 @@ const path = require('path')
 const https = require('https')
 
 let win
+let updater = null
+
+if (app.isPackaged) {
+  try {
+    const { autoUpdater } = require('electron-updater')
+    autoUpdater.autoDownload = true
+    autoUpdater.autoInstallOnAppQuit = true
+    updater = autoUpdater
+  } catch (e) {
+    console.error('updater unavailable:', e.message)
+  }
+}
 
 function mkWin() {
   win = new BrowserWindow({
@@ -32,6 +44,12 @@ function mkWin() {
 
   win.on('maximize', () => win.webContents.send('win-state', 'max'))
   win.on('unmaximize', () => win.webContents.send('win-state', 'restore'))
+
+  if (updater) {
+    updater.on('update-available', () => win?.webContents.send('update-available'))
+    updater.on('update-downloaded', () => win?.webContents.send('update-downloaded'))
+    updater.checkForUpdates().catch(() => {})
+  }
 }
 
 app.whenReady().then(() => {
@@ -86,19 +104,4 @@ ipcMain.handle('api', (_, { method, endpoint, body, token }) => {
 
 ipcMain.handle('open-url', (_, url) => shell.openExternal(url))
 
-
-ipcMain.handle('open-console', (_, url) => {
-  const vncWin = new BrowserWindow({
-    width: 1024,
-    height: 768,
-    minWidth: 800,
-    minHeight: 600,
-    title: 'Server Console',
-    autoHideMenuBar: true,
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-    }
-  })
-  vncWin.loadURL(url)
-})
+ipcMain.on('install-update', () => updater?.quitAndInstall())

@@ -59,6 +59,21 @@
 [data-theme="dark"] .novnc-btn { background: var(--surface2); color: var(--text); border: 1.5px solid var(--border); }
 [data-theme="dark"] .novnc-btn:hover { background: var(--border2); }
 
+.status-banners { display: flex; flex-direction: column; }
+.status-banner { display: flex; align-items: center; gap: 8px; padding: 7px 20px; font-size: 12.5px; font-weight: 500; }
+.banner-offline { background: var(--terra); color: #fff; }
+.banner-update { background: var(--blue-d); color: #fff; }
+.banner-update button { margin-left: auto; background: rgba(255,255,255,.2); border: none; color: #fff; padding: 3px 12px; border-radius: var(--r-sm); cursor: pointer; font-family: inherit; font-size: 12px; font-weight: 600; }
+.banner-update button:hover { background: rgba(255,255,255,.35); }
+
+.console-tab-frame { position: absolute; inset: 0; display: flex; flex-direction: column; background: #0d0d0d; z-index: 10; }
+.console-tab-bar { display: flex; align-items: center; gap: 10px; padding: 0 20px; height: 48px; background: var(--surface); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.console-tab-bar-title { font-size: 13px; font-weight: 600; color: var(--text); margin-right: 4px; }
+.console-tab-bar .back-btn { margin-bottom: 0; }
+.console-tab-bar .tabs { margin: 0; margin-left: auto; border-bottom: none; }
+.console-tab-bar .tab-btn { border-bottom: none; margin-bottom: 0; }
+.console-webview-tab { flex: 1; width: 100%; border: none; }
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
@@ -251,7 +266,7 @@ select { appearance: none; cursor: pointer; }
 .sidebar-spacer { flex: 1; }
 .sidebar-bottom { border-top: 1px solid var(--border); padding-top: 8px; }
 
-.main-content { flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--bg); }
+.main-content { flex: 1; overflow-y: auto; overflow-x: hidden; background: var(--bg); position: relative; }
 .page-header { padding: 28px 32px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
 .page-header h1 { font-size: 26px; font-weight: 700; letter-spacing: -.025em; }
 .page-header p { font-size: 13.5px; color: var(--text-mid); margin-top: 3px; }
